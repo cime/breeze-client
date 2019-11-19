@@ -13,6 +13,7 @@ interface IEnd {
   multiplicity: string;
   type: string;
   role: string;
+  hasOrphanDelete?: boolean;
 }
 
 function parse(metadataStore: MetadataStore, schemas: any, altMetadata: any) {
@@ -229,6 +230,7 @@ function parseCsdlNavProperty(entityType: EntityType, csdlProperty: any, schema:
   });
 
   let isScalar = toEnd!.multiplicity !== "*";
+  let hasOrphanDelete = toEnd.hasOrphanDelete;
   let dataType = parseTypeNameWithSchema(toEnd!.type, schema).typeName;
 
   let constraint = association.referentialConstraint;
@@ -253,6 +255,7 @@ function parseCsdlNavProperty(entityType: EntityType, csdlProperty: any, schema:
     entityTypeName: dataType,
     isScalar: isScalar,
     associationName: association.name,
+    hasOrphanDelete: hasOrphanDelete
   };
 
   if (constraint) {

@@ -1921,6 +1921,7 @@ export interface DataPropertyConfig {
   complexTypeName?: string;
   isNullable?: boolean;
   isScalar?: boolean; // will be false for some NoSQL databases.
+  hasOrphanDelete?: boolean;
   defaultValue?: any;
   isPartOfKey?: boolean;
   isUnmapped?: boolean;
@@ -1963,6 +1964,7 @@ export class DataProperty {
   isNullable: boolean;
   /**  Whether this property is scalar (i.e., returns a single value as opposed to an array). __Read Only__ */
   isScalar: boolean; // will be false for some NoSQL databases.
+  hasOrphanDelete: boolean;
   /** The default value for this property. __Read Only__ */
   defaultValue: any;
   /**  Whether this property is a 'key' property. __Read Only__ */
@@ -2015,6 +2017,7 @@ export class DataProperty {
       .whereParam("complexTypeName").isOptional()
       .whereParam("isNullable").isBoolean().isOptional().withDefault(true)
       .whereParam("isScalar").isOptional().withDefault(true)// will be false for some NoSQL databases.
+      .whereParam("hasOrphanDelete").isOptional().withDefault(false)
       .whereParam("defaultValue").isOptional()
       .whereParam("isPartOfKey").isBoolean().isOptional()
       .whereParam("isUnmapped").isBoolean().isOptional()
@@ -2073,6 +2076,7 @@ export class DataProperty {
       this.isScalar = this.isScalar == null || this.isScalar === true;
     }
 
+    this.hasOrphanDelete = this.hasOrphanDelete === true;
   }
 
   static getRawValueFromServer(rawEntity: Object, dp: DataProperty) {
@@ -2225,6 +2229,7 @@ export class NavigationProperty {
   /**
   Whether this property returns a single entity as opposed to  an array of entities. __Read Only__ */
   isScalar: boolean;
+  hasOrphanDelete: boolean;
   /** The name of the association to which that this property belongs.  This associationName will be shared with this
   properties 'inverse'. __Read Only__ */
   associationName: string;
@@ -2271,6 +2276,7 @@ export class NavigationProperty {
       .whereParam("nameOnServer").isString().isOptional()
       .whereParam("entityTypeName").isString()
       .whereParam("isScalar").isBoolean().isOptional().withDefault(true)
+      .whereParam("hasOrphanDelete").isOptional().withDefault(false)
       .whereParam("associationName").isString().isOptional()
       .whereParam("foreignKeyNames").isArray().isString().isOptional().withDefault([])
       .whereParam("foreignKeyNamesOnServer").isArray().isString().isOptional().withDefault([])

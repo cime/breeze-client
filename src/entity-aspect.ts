@@ -385,6 +385,11 @@ export class EntityAspect {
     let entity = this.entity!;
     let em = this.entityManager!;
     let needsSave = true;
+
+    if (entityState === EntityState.Deleted || entityState === EntityState.Detached) {
+      this.cascadeDelete(entity);
+    }
+
     if (entityState === EntityState.Unchanged) {
       clearOriginalValues(entity);
       delete this.hasTempKey;
@@ -420,6 +425,22 @@ export class EntityAspect {
     this.entityState = entityState;
     em._notifyStateChange(entity, needsSave);
     return true;
+  }
+
+  cascadeDelete(entity: Entity) {
+    const entityType = entity.entityType;
+      const navigationProperties = entityType.navigationProperties.filter(function (navigationProperty: NavigationProperty) {
+        return !navigationProperty.isScalar && navigationProperty.hasOrphanDelete;
+    });
+
+    navigationProperties.forEach(function (navigationProperty) {
+        const propertyValue = entity[navigationProperty.name];
+        propertyValue.slice().reverse().forEach(function (childEntity: Entity) {
+            if (childEntity.entityAspect.entityState !== EntityState.Deleted && childEntity.entityAspect.entityState !== EntityState.Detached) {
+                childEntity.entityAspect.setDeleted();
+            }
+        });
+    });
   }
 
   loadNavigationProperty(navigationProperty: string, callback?: QuerySuccessCallback, errorCallback?: QueryErrorCallback): Promise<QueryResult>;
